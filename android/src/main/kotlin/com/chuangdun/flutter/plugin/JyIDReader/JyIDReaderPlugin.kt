@@ -2,6 +2,7 @@ package com.chuangdun.flutter.plugin.JyIDReader
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.MediaPlayer
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.NonNull
@@ -38,7 +39,7 @@ class JyIDReaderPlugin: FlutterPlugin{
   }
 
   class IDReaderHandler(context: Context): MethodCallHandler, EventChannel.StreamHandler{
-
+    private var mediaPlayer: MediaPlayer?=null
     private val tag = this.javaClass.simpleName
     private val contextRef = WeakReference<Context>(context)
     private val mainHandler = Handler()
@@ -50,8 +51,11 @@ class JyIDReaderPlugin: FlutterPlugin{
               // 身份证头像
       bitmap: Bitmap ->
       run {
+
         when (type) {
           1 -> {
+            mediaPlayer = MediaPlayer.create(contextRef.get(),R.raw.ic_card_success)
+            mediaPlayer?.start()
             val data = mutableMapOf<String, Any>()
             data["type"] = 1
             data["id"] = idCardInfo!!.id
@@ -68,9 +72,13 @@ class JyIDReaderPlugin: FlutterPlugin{
             mainHandler.post { events?.success(data) }
 
           }
-          2 -> Log.w(tag, "读取到外国人居住证")
-          3 -> Log.w(tag, "读取到港澳台居住证")
-          else -> Log.w(tag, "读取到未知的证件类型")
+//          2 -> Log.w(tag, "读取到外国人居住证")
+//          3 -> Log.w(tag, "读取到港澳台居住证")
+          else -> {
+            mediaPlayer = MediaPlayer.create(contextRef.get(),R.raw.ic_card_failure)
+            mediaPlayer?.start()
+            Log.w(tag, "读取到未知的证件类型")
+          }
         }
       }
     }
@@ -95,12 +103,16 @@ class JyIDReaderPlugin: FlutterPlugin{
           result.success(mIDCardRead.samid)
         }
         "startIDThread" -> {
+          mediaPlayer=MediaPlayer.create(contextRef.get(),R.raw.ic_card_began_read)
+          mediaPlayer?.start()
           result.success(mIDCardRead.startIDThread())
         }
         "stopIDThread" -> {
           mIDCardRead.stopIDThread()
         }
         "closeDevice" -> {
+          mediaPlayer?.stop()
+          mediaPlayer?.release()
           result.success(mIDCardRead.closeDevice())
         }
         else -> result.notImplemented()
