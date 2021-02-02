@@ -42,18 +42,20 @@ class JyIDReader {
   Stream<IDCardInfo> get onReceiveCardData => _onReadCardData.stream;
 
   void _onEvent(dynamic data) {
-    var cardInfo = IDCardInfo(
-        type: data["type"],
-        id: data["id"],
-        name: data["name"],
-        sex: data["sex"],
-        nation: data["nation"],
-        birth: data["birth"],
-        address: data["address"],
-        depart: data["depart"],
-        validityTime: data["validityTime"],
-        bitmap: data["bitmap"]);
-    _onReadCardData.add(cardInfo);
+    if(!_onReadCardData.isClosed){
+      var cardInfo = IDCardInfo(
+          type: data["type"],
+          id: data["id"],
+          name: data["name"],
+          sex: data["sex"],
+          nation: data["nation"],
+          birth: data["birth"],
+          address: data["address"],
+          depart: data["depart"],
+          validityTime: data["validityTime"],
+          bitmap: data["bitmap"]);
+      _onReadCardData.add(cardInfo);
+    }
   }
 
   ///初始化身份证阅读器.

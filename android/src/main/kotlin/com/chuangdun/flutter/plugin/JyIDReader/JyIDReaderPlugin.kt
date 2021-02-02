@@ -9,7 +9,6 @@ import androidx.annotation.NonNull
 import com.zkteco.android.IDReader.IDCardRead
 import com.zkteco.android.biometric.module.idcard.meta.IDCardInfo
 import com.zkteco.android.biometric.module.idcard.meta.IDPRPCardInfo
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -19,15 +18,15 @@ import io.flutter.plugin.common.MethodChannel.Result
 import java.io.ByteArrayOutputStream
 import java.lang.ref.WeakReference
 
+private const val TAG = "JyIDReaderPlugin"
 /** JyIDReaderPlugin */
 class JyIDReaderPlugin: FlutterPlugin{
 
   private lateinit var channel : MethodChannel
   private lateinit var eventChannel : EventChannel
-
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "JyIDReader")
-    eventChannel = EventChannel(flutterPluginBinding.binaryMessenger,"JyIDReader/onRead")
+    eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "JyIDReader/onRead")
     val readerHandler = IDReaderHandler(flutterPluginBinding.applicationContext)
     channel.setMethodCallHandler(readerHandler)
     eventChannel.setStreamHandler(readerHandler)
@@ -43,18 +42,17 @@ class JyIDReaderPlugin: FlutterPlugin{
     private val tag = this.javaClass.simpleName
     private val contextRef = WeakReference<Context>(context)
     private val mainHandler = Handler()
-    private val listener: IDCardRead.getIDCardInfoListen = IDCardRead.getIDCardInfoListen(){
-      type: Int,//证件类型
-      idCardInfo: IDCardInfo?,//中国大陆居民身份证
-      idprpCardInfo: IDPRPCardInfo?,//外国人永居证
-      gangaotaiIdCardInfo: IDCardInfo?,//港澳台居住证
-              // 身份证头像
-      bitmap: Bitmap ->
+    private val listener: IDCardRead.getIDCardInfoListen = IDCardRead.getIDCardInfoListen(){ type: Int,//证件类型
+                                                                                             idCardInfo: IDCardInfo?,//中国大陆居民身份证
+                                                                                             idprpCardInfo: IDPRPCardInfo?,//外国人永居证
+                                                                                             gangaotaiIdCardInfo: IDCardInfo?,//港澳台居住证
+            // 身份证头像
+                                                                                             bitmap: Bitmap ->
       run {
 
         when (type) {
           1 -> {
-            mediaPlayer = MediaPlayer.create(contextRef.get(),R.raw.ic_card_success)
+            mediaPlayer = MediaPlayer.create(contextRef.get(), R.raw.ic_card_success)
             mediaPlayer?.start()
             val data = mutableMapOf<String, Any>()
             data["type"] = 1
@@ -67,7 +65,7 @@ class JyIDReaderPlugin: FlutterPlugin{
             data["depart"] = idCardInfo!!.depart
             data["validityTime"] = idCardInfo!!.validityTime
             val outputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
             data["bitmap"] = outputStream.toByteArray()
             mainHandler.post { events?.success(data) }
 
@@ -75,7 +73,7 @@ class JyIDReaderPlugin: FlutterPlugin{
 //          2 -> Log.w(tag, "读取到外国人居住证")
 //          3 -> Log.w(tag, "读取到港澳台居住证")
           else -> {
-            mediaPlayer = MediaPlayer.create(contextRef.get(),R.raw.ic_card_failure)
+            mediaPlayer = MediaPlayer.create(contextRef.get(), R.raw.ic_card_failure)
             mediaPlayer?.start()
             Log.w(tag, "读取到未知的证件类型")
           }
@@ -103,7 +101,7 @@ class JyIDReaderPlugin: FlutterPlugin{
           result.success(mIDCardRead.samid)
         }
         "startIDThread" -> {
-          mediaPlayer=MediaPlayer.create(contextRef.get(),R.raw.ic_card_began_read)
+          mediaPlayer = MediaPlayer.create(contextRef.get(), R.raw.ic_card_began_read)
           mediaPlayer?.start()
           result.success(mIDCardRead.startIDThread())
         }
