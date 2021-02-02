@@ -84,6 +84,7 @@ class JyIDReaderPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHa
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
         if (!threadPool.isShutdown){
             threadPool.shutdownNow()
         }
