@@ -42,6 +42,6 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation files('libs\\IDCardModule.jar')
-    implementation files('libs\\zkandroidcore.jar')
+    provided files('libs\\zkandroidcore.jar')
     implementation files('libs\\zkandroididcardreader.jar')
 }
